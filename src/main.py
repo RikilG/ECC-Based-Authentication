@@ -4,41 +4,37 @@ from hospital import Hospital
 from patient import Patient
 
 
-
 def hospital_upload_phase(hospital,cloud):
-
-    
-    A = (str(hospital.id_h)+str(hospital.R)+str(cloud.get_cloud_randomnumber()))
-    s1 = hashlib.sha256(b'A').hexdigest()
-
-    B = hospital.get_hospital_id()^cloud.get_cloud_randomnumber()
+    hospital.ping_to_cloud(cloud)
+    cloud.ping_to_hospital(hospital)
+    hospital.send_message(cloud)
+    cloud.receive_and_store()
 
 
+# def patient_data_upload_phase():
+#     pass
 
-def patient_data_upload_phase():
-  hello = 3
+
+# def treatment_phase():
+#     pass
 
 
-def treatment_phase():
-  hello = 4
+# def checkup_phase():
+#     pass
 
-def  checkup_phase():
-  hello = 5
 
 def main():
-  hospital = Hospital()
-  patient = Patient()
-  cloud = Cloud()
-  hospital.send_to_cloud(cloud)
-  cloud.send_to_hospital(hospital)
-  hospital_upload_phase(hospital,cloud)
-  # patient_data_upload_phase()
-  # treatment_phase()
-  # checkup_phase()
+    # initialize class objects
+    hospital = Hospital()
+    patient = Patient()
+    cloud = Cloud()
+
+    # section 4.1 - Healthcare centre upload phase
+    hospital_upload_phase(hospital, cloud)
+    # patient_data_upload_phase()
+    # treatment_phase()
+    # checkup_phase()
 
 
 if __name__ == "__main__":
-  main()
-
-  
-
+    main()

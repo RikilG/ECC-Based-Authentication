@@ -1,2 +1,2 @@
 class Patient:
-  
+    pass
