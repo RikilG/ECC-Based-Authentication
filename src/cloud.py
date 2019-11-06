@@ -1,23 +1,45 @@
-import random
-import hashlib
+from CryptoHelper import *
 
 
 class Cloud:
 
     def __init__(self):
-        self.x = random.randint(0,2**8-1)
-        self.h_data = (0,0)
+        self.h_data = (0,0)     # id_h, R
+        self.message = (0,0)    # S2, C1
 
-    def send_to_hospital(self,hospital):
-        A = (str(self.h_data[0])+str(self.h_data[1])+str(self.x))
-        A = str.encode(A)
-        A = hashlib.sha256(A).hexdigest()
-        A = str.encode(A)
-        s1 = hashlib.sha256(A).hexdigest() 
-        B = self.h_data[0]^self.x
+
+    def ping_to_hospital(self,hospital):
+        id_h, R = self.h_data
+        x   = gen_randint()
+        A   = gen_hash(id_h, R, x)
+        s1  = gen_hash(A)
+        B   = id_h^x
+        print("Send <S1, B> to Hospital via PUBLIC channel")
         hospital.c_data = (s1,B)
+        self.A = A
+        self.B = B
     
 
-    def get_cloud_randomnumber(self):
-        return self.x
+    def receive_and_store():
+        id_h, A, B = self.id_h, self.A, self.B
+        S2, C1 = self.message
+        SK1_hc  = gen_hash(id_h, A, B)
+
+        if S21 != gen_hash(SK1_hc, C1):
+            print("Cannot Authenticate Hospital")
+            exit()
+        
+        id_p, id_d, C_h, Sig_h, SID = decrypt(SK_hc, C1)
+        # database.store(id_p, C_h, Sig_h, SID)
+        print("Data received: ")
+        print(id_p, C_h, Sig_h, SID)
     
+
+    # def get_cloud_randomnumber(self):
+    #     return self.x
+
+if __name__ == "__main__":
+    # just to test functions
+    cloud = Cloud()
+    cloud.h_data = (123,23)
+    cloud.ping_to_hospital(cloud)

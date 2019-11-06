@@ -1,12 +1,12 @@
-import random
-import hashlib
+from CryptoHelper import *
+from CryptoWrapper import eccEncrypt
 
 
 class Hospital:
 
     def __init__(self):
         self.id_h = 1
-        self.R = random.randint(0,2**8)
+        self.R = gen_randint()
         self.c_data = (0,0)
 
     # def get_hospital_id(self):
@@ -15,31 +15,33 @@ class Hospital:
     # def get_hospital_randomnumber(self):
     #     return self.R
 
-    def send_to_cloud(self,cloud):
+    def ping_to_cloud(self,cloud):
+        print("Send <ID_h, R> to Cloud via SECURE channel")
         cloud.h_data = (self.id_h,self.R)
+    
 
+    def send_message(cloud):
+        S1, B = self.c_data
+        id_h  = self.id_h
 
-    def verify_and_send_key(self,cloud):
-        s1,B = self.c_data
-        x1 = B^self.id_h
+        x1 = B^id_h
+        A1 = gen_hash(id_h, x1, B)
 
-        A = (str(self.id_h)+str(x1)+str(B))
-        A = str.encode(A)
-        A1 = hashlib.sha256(A).hexdigest()
-        val = str.encode(A)
-        s1_check = hashlib.sha256(val).hexdigest()
+        if S1 != gen_hash(A1):
+            print("Unable to verify cloud")
+            exit()
 
-        hold=False
+        print("Cloud verified")
 
-        if(s1_check==s1):
-            hold=True
+        SK_hc   = gen_hash(id_h, A1, B)
+        key1    = gen_hash(id_p, Ni)
+        C_h     = encrypt(key1, m_h)
+        MD_h    = gen_hash(m_h)
+        Sig_h   = gen_sig(PR_h, MD_h)
+        C1      = encrypt(SK_hc, id_p, id_d, C_h, Sig_h, NID)
+        S2      = gen_hash(SK_hc, C1)
 
-        if hold is True:
-            temp = str(self.id_h)+str(A1)+str(B)
-            temp = str.encode(temp)
-            SKhc = hashlib.sha256(temp).hexdigest
-            temp = str(self.id_h)+str(Ni)
-            temp = str.encode(temp)
-            key1 = hashlib.sha256(temp).hexdigest
+        print("Sending message to cloud via PUBLIC channel")
+        cloud.message = (S2, C1)
 
         
