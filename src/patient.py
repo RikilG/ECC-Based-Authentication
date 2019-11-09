@@ -1,2 +1,4 @@
 class Patient:
-    pass
+
+    def __init__(self):
+        self.id_p = 999
