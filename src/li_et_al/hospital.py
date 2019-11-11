@@ -16,14 +16,14 @@ class Hospital:
 
 
     def ping_to_cloud(self,cloud):
-        print(":: phase 1, step 1 ::")
+        print(":: phase 1, step 1 :: Hospital")
         print("Send <ID_h, R> to Cloud via SECURE channel")
         # print(f"Send <ID_h, R> = <{self.id_h}, {self.R}> to Cloud via SECURE channel")
         cloud.h_data = (self.id_h,self.R)
     
 
     def send_message(self, cloud):
-        print(":: phase 1, step 3 ::")
+        print(":: phase 1, step 3 :: Hospital")
         S1, B = self.c_data
         id_h, id_p, id_d  = self.id_h, self.id_p, self.id_d
         R, m_h = self.R, self.m_h

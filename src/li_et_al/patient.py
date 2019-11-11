@@ -18,6 +18,7 @@ class Patient:
         doctor.id_p     = self.id_p
         doctor.Ni       = self.Ni
         doctor.PU_h     = hospital.PU_h
+        doctor.PU_p     = self.PU_p
         hospital.NID    = self.NID
         hospital.Ni     = self.Ni
         hospital.id_p   = self.id_p
@@ -25,13 +26,13 @@ class Patient:
     
 
     def ping_to_cloud(self, cloud):
-        print(":: phase 2, step 1 ::")
+        print(":: phase 2, step 1 :: Patient")
         print("Send <ID_p, NID> to Cloud via SECURE channel")
         cloud.p_data = (self.id_p, self.NID)
     
 
     def send_message(self, cloud):
-        print(":: phase 2, step 3 ::")
+        print(":: phase 2, step 3 :: Patient")
         I, S3, C_h, Sig_h = self.c_data
         Ni, NID = self.Ni, self.NID
         id_p, m_b = self.id_p, self.m_b

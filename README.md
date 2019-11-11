@@ -18,14 +18,15 @@ protocol for cloud-assisted TMIS
 
 ## Table of Contents
 
-* [About the Project](#about-the-project)
-* [Getting Started](#getting-started)
-  * [Prerequisites](#prerequisites)
-  * [Installation](#installation)
-  * [Dependencies](#dependencies)
-* [License](#license)
-* [Team Members](#team-members)
-* [Acknowledgements](#acknowledgements)
+- [Table of Contents](#table-of-contents)
+- [About The Project](#about-the-project)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Dependencies](#dependencies)
+- [License](#license)
+- [Team Members](#team-members)
+- [Acknowledgements](#acknowledgements)
 
 
 ## About The Project
@@ -50,13 +51,14 @@ pip install pycryptodome # make sure pip supports python 3 and not python 2
 
 ### Installation
  
-1. Clone the ECC-Based-Authentication
+1. Clone this repo
 ```sh
 git clone https://github.com/RikilG/ECC-Based-Authentication.git
 cd ECC-Based-Authentication
 ```
 2. Run program
 ```sh
+cd src
 python main.py
 ```
 

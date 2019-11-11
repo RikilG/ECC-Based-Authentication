@@ -4,16 +4,17 @@ from CryptoAPI import *
 class Cloud:
 
     def __init__(self):
-        self.h_data   = (0, 0)    # id_h, R
-        self.p_data   = (0, 0)    # id_p, NID
-        self.d_data   = (0, 0, 0) # id_d, id_p, RD
-        self.message  = (0,0)    # S2, C1 || S4, C2
-        self.database = {}
-        self.Sni      = gen_randint()
+        self.h_data     = (0, 0)    # id_h, R
+        self.p_data     = (0, 0)    # id_p, NID
+        self.d_data     = (0, 0, 0) # id_d, id_p, RD
+        self.message    = (0,0)    # S2, C1 || S4, C2
+        self.database   = {}
+        self.Sni        = gen_randint()
+        self.SK_dc      = 0
 
 
     def ping_to_hospital(self,hospital):
-        print(":: phase 1, step 2 ::")
+        print(":: phase 1, step 2 :: Cloud")
         id_h, R = self.h_data
         self.id_h = id_h
 
@@ -29,7 +30,7 @@ class Cloud:
     
 
     def ping_to_patient(self, patient):
-        print(":: phase 2, step 2 ::")
+        print(":: phase 2, step 2 :: Cloud")
         id_p, NID = self.p_data
         Sig_h   = self.database['Sig_h']
         C_h     = self.database['C_h']
@@ -42,13 +43,14 @@ class Cloud:
 
     
     def ping_to_doctor(self, doctor):
-        print(":: phase 3, step 2 ::")
+        print(":: phase 3, step 2 :: Cloud")
         id_d, id_p, RD = self.d_data
         Sig_h   = self.database['Sig_h']
         Sig_p   = self.database['Sig_p']
         C_p     = self.database['C_p']
 
         SK_dc   = gen_hash(id_d, id_p, RD)
+        self.SK_dc = SK_dc
         S5      = gen_hash(SK_dc, Sig_h, Sig_p, C_p)
         C3      = encrypt(SK_dc, [Sig_h, Sig_p, C_p])
         print("Send <S5, C3> to Doctor via PUBLIC channel")
@@ -56,7 +58,7 @@ class Cloud:
     
 
     def receive_and_store_hospital(self):
-        print(":: phase 1, step 4 ::")
+        print(":: phase 1, step 4 :: Cloud")
         id_h, A, B  = self.id_h, self.A, self.B
         S2, C1      = self.message
         SK1_hc      = gen_hash(id_h, A, B)
@@ -75,7 +77,7 @@ class Cloud:
     
 
     def receive_and_store_patient(self):
-        print(":: phase 2, step 4 ::")
+        print(":: phase 2, step 4 :: Cloud")
         S4, C2      = self.message
         Sni         = self.Sni
         id_p, NID   = self.p_data
@@ -95,7 +97,10 @@ class Cloud:
 
 
     def receive_and_store_doctor(self):
+        print(":: phase 3, step 4 :: Cloud")
         S6, C4 = self.message
+        SK_dc  = self.SK_dc
+
 
         C_d, Sig_d  = decrypt(SK_dc, C4)
 
