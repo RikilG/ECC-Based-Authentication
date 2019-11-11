@@ -1,39 +1,53 @@
-import hashlib
 from cloud import Cloud
-from hospital import Hospital
+from doctor import Doctor
 from patient import Patient
-
-
-def hospital_upload_phase(hospital,cloud):
-    hospital.ping_to_cloud(cloud)
-    cloud.ping_to_hospital(hospital)
-    hospital.send_message(cloud)
-    cloud.receive_and_store()
-
-
-# def patient_data_upload_phase():
-#     pass
-
-
-# def treatment_phase():
-#     pass
-
-
-# def checkup_phase():
-#     pass
+from hospital import Hospital
 
 
 def main():
     # initialize class objects
-    hospital = Hospital()
-    patient = Patient()
-    cloud = Cloud()
+    patient  = Patient()
+    doctor   = Doctor(patient)
+    hospital = Hospital(patient, doctor)
+    cloud    = Cloud()
+    patient.meet(doctor, hospital)
 
     # section 4.1 - Healthcare centre upload phase
     hospital_upload_phase(hospital, cloud)
-    # patient_data_upload_phase()
-    # treatment_phase()
-    # checkup_phase()
+    # section 4.2 - Patient data upload phase
+    patient_data_upload_phase(patient, cloud)
+    # section 4.3 - Treatment phase
+    treatment_phase(doctor, cloud)
+    # section 4.4 - Check up phase
+    checkup_phase()
+
+
+def hospital_upload_phase(hospital,cloud):
+    print("\n########## Phase1 ##########")
+    hospital.ping_to_cloud(cloud)
+    cloud.ping_to_hospital(hospital)
+    hospital.send_message(cloud)    # also verify
+    cloud.receive_and_store_hospital()
+
+
+def patient_data_upload_phase(patient, cloud):
+    print("\n########## Phase2 ##########")
+    patient.ping_to_cloud(cloud)
+    cloud.ping_to_patient(patient)
+    patient.send_message(cloud)
+    cloud.receive_and_store_patient()
+
+    
+def treatment_phase(doctor, cloud):
+    print("\n########## Phase3 ##########")
+    # doctor.ping_to_cloud(cloud)
+    # cloud.ping_to_doctor(doctor)
+    # doctor.send_message(cloud)
+    # cloud.receive_and_store_doctor()
+
+
+def checkup_phase():
+    print("\n########## Phase4 ##########")
 
 
 if __name__ == "__main__":
