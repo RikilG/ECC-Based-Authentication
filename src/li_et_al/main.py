@@ -19,7 +19,7 @@ def main():
     # section 4.3 - Treatment phase
     treatment_phase(doctor, cloud)
     # section 4.4 - Check up phase
-    checkup_phase()
+    checkup_phase(patient, cloud)
 
 
 def hospital_upload_phase(hospital,cloud):
@@ -46,8 +46,12 @@ def treatment_phase(doctor, cloud):
     cloud.receive_and_store_doctor()
 
 
-def checkup_phase():
+def checkup_phase(patient, cloud):
     print("\n########## Phase4 ##########")
+    patient.ping_download_request(cloud)
+    cloud.ping_download_request(patient)
+    patient.send_message_checkup(cloud)
+    cloud.save_patient_data()
 
 
 if __name__ == "__main__":

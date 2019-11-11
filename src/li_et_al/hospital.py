@@ -46,7 +46,6 @@ class Hospital:
         C_h     = encrypt(key1, [m_h])
         MD_h    = gen_hash(m_h)
         Sig_h   = gen_sig(PR_h, MD_h)
-        print(MD_h)
         C1      = encrypt(SK_hc, [id_p, id_d, C_h, Sig_h, NID])
         S2      = gen_hash(SK_hc, C1)
 

@@ -18,7 +18,7 @@ class CryptoWrapper():
     def __generateAESKeystring__(self):
         '''Generates Pseudo Random AES Key and Base64 Encodes Key - Returns AES Key'''
         key = os.urandom(self.keySize)
-        keyString = base64.urlsafe_b64encode(str(key))
+        keyString = base64.urlsafe_b64encode(key)
         return keyString
         
     def __extractAESKey__(self, keyString):

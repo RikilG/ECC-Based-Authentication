@@ -5,12 +5,13 @@ class Cloud:
 
     def __init__(self):
         self.h_data     = (0, 0)    # id_h, R
-        self.p_data     = (0, 0)    # id_p, NID
+        self.p_data     = (0, 0)    # id_p, NID || id_p, id_d, Sni
         self.d_data     = (0, 0, 0) # id_d, id_p, RD
-        self.message    = (0,0)    # S2, C1 || S4, C2
+        self.message    = (0,0)    # S2, C1 || S4, C2 || S9, C5
         self.database   = {}
         self.Sni        = gen_randint()
         self.SK_dc      = 0
+        self.SK_pc1     = 0
 
 
     def ping_to_hospital(self,hospital):
@@ -84,6 +85,7 @@ class Cloud:
         id_h        = self.id_h
 
         SK_pc1      = gen_hash(id_p, NID, Sni)
+        self.SK_pc1  = SK_pc1
         C_p, Sig_p  = decrypt(SK_pc1, C2)
 
         if S4 != gen_hash(SK_pc1, C_p, Sig_p):
@@ -112,6 +114,37 @@ class Cloud:
         self.database['C_d']    = C_d
         self.database['Sig_d']  = Sig_d
         print("Saved Doctor data to database")
+    
+
+    def ping_download_request(self, patient):
+        print(":: phase 4, step 2:: Cloud")
+        id_p, id_d, Sni = self.p_data
+        # check database record using id_p, id_d, Sni
+        NID     = self.database['NID']
+        C_d     = self.database['C_d']
+        Sig_d   = self.database['Sig_d']
+        SK_pc1  = gen_hash(id_p, NID, Sni)
+
+        S8      = gen_hash(SK_pc1, C_d, Sig_d)
+        print("Send <S8, C_d, Sig_d> to Patient via PUBLIC channel")
+        patient.c_data = (S8, C_d, Sig_d)
+
+
+    def save_patient_data(self):
+        print(":: phase 4, step 4 :: Cloud")
+        S9, C5  = self.message
+        SK_pc1  = self.SK_pc1
+
+        if S9 != gen_hash(SK_pc1, C5):
+            print("Unable to verify Patient")
+            exit(1)
+        print("Patient verified")
+
+        self.database['C5'] = C5
+        print("Saved patient data to database")
+        print("Decryption key lies with patient")
+        print("SUCCESS! completed TMIS transaction using Li et al. Protocol")
+
 
 
 if __name__ == "__main__":

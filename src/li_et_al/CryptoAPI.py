@@ -24,6 +24,13 @@ def gen_randint(h_limit=2**8-1):
     return random.randint(0, h_limit)
 
 
+def gen_AES_key():
+    """generate a random key for AES encryption
+    """
+    crypto = CryptoWrapper()
+    return crypto.__generateAESKeystring__()
+
+
 def encrypt(key, data_list):
     """encrypt each term in data_list using given key and return the list 
     of encrypted values
