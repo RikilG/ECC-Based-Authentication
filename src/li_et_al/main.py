@@ -7,8 +7,8 @@ from hospital import Hospital
 def main():
     # initialize class objects
     patient  = Patient()
-    doctor   = Doctor(patient)
-    hospital = Hospital(patient, doctor)
+    doctor   = Doctor()
+    hospital = Hospital()
     cloud    = Cloud()
     patient.meet(doctor, hospital)
 
@@ -40,10 +40,10 @@ def patient_data_upload_phase(patient, cloud):
     
 def treatment_phase(doctor, cloud):
     print("\n########## Phase3 ##########")
-    # doctor.ping_to_cloud(cloud)
-    # cloud.ping_to_doctor(doctor)
-    # doctor.send_message(cloud)
-    # cloud.receive_and_store_doctor()
+    doctor.ping_to_cloud(cloud)
+    cloud.ping_to_doctor(doctor)
+    doctor.send_message(cloud)
+    cloud.receive_and_store_doctor()
 
 
 def checkup_phase():

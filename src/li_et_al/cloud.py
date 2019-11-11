@@ -42,11 +42,17 @@ class Cloud:
 
     
     def ping_to_doctor(self, doctor):
-        print("phase2, step2")
+        print(":: phase 3, step 2 ::")
         id_d, id_p, RD = self.d_data
+        Sig_h   = self.database['Sig_h']
+        Sig_p   = self.database['Sig_p']
+        C_p     = self.database['C_p']
 
         SK_dc   = gen_hash(id_d, id_p, RD)
-        S5      = gen_hash(SK_dc, Sig)
+        S5      = gen_hash(SK_dc, Sig_h, Sig_p, C_p)
+        C3      = encrypt(SK_dc, [Sig_h, Sig_p, C_p])
+        print("Send <S5, C3> to Doctor via PUBLIC channel")
+        doctor.c_data = (S5, C3)
     
 
     def receive_and_store_hospital(self):
@@ -61,12 +67,6 @@ class Cloud:
         
         print("Hospital authenticated")
         id_p, id_d, C_h, Sig_h, NID = decrypt(SK1_hc, C1)
-        # print("Data received: ")
-        # print(id_p.decode())
-        # print(id_d.decode())
-        # print(C_h.decode())
-        # print(Sig_h.decode())
-        # print(NID.decode())
         self.database['id_p']   = id_p
         self.database['C_h']    = C_h
         self.database['Sig_h']  = Sig_h
@@ -95,7 +95,18 @@ class Cloud:
 
 
     def receive_and_store_doctor(self):
-        pass
+        S6, C4 = self.message
+
+        C_d, Sig_d  = decrypt(SK_dc, C4)
+
+        if S6 != gen_hash(SK_dc, C_d, Sig_d):
+            print("Cannot authenticate Doctor ")
+            exit(1)
+        print("Doctor authenticated")
+
+        self.database['C_d']    = C_d
+        self.database['Sig_d']  = Sig_d
+        print("Saved Doctor data to database")
 
 
 if __name__ == "__main__":

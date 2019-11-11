@@ -13,8 +13,15 @@ class Patient:
     
 
     def meet(self, doctor, hospital):
-        self.id_d = doctor.id_d
-        self.PU_h = hospital.PU_h
+        self.id_d       = doctor.id_d
+        self.PU_h       = hospital.PU_h
+        doctor.id_p     = self.id_p
+        doctor.Ni       = self.Ni
+        doctor.PU_h     = hospital.PU_h
+        hospital.NID    = self.NID
+        hospital.Ni     = self.Ni
+        hospital.id_p   = self.id_p
+        hospital.id_d   = doctor.id_d
     
 
     def ping_to_cloud(self, cloud):
@@ -52,6 +59,7 @@ class Patient:
         
         print("Hospital authenticated")
         key_pd  = gen_hash(id_p, id_d, Ni)
+        print("key_pd: ", key_pd)
         C_p     = encrypt(key_pd, [m_h, m_b])
         Sig_p   = gen_sig(PR_p, MD_p)
         C2      = encrypt(SK_pc, [C_p, Sig_p])
