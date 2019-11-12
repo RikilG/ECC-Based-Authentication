@@ -13,10 +13,13 @@ class Cloud:
         self.Sni      = gen_randint()
         self.T_C1 = 0
         self.T_C2 = 0
+        self.T_C10 = 0 
+        self.T_C11 = 0
         self.b = gen_randint # b belongs to Zq*
         self.delta_T = 5000
         self.S1      = 0
         self.g       = gen_randint()
+        self.y      = 0  # y belongs to Zq*
 
 
     def ping_to_hospital(self,hospital):
@@ -132,6 +135,57 @@ class Cloud:
         self.database['C_d']    = C_d
         self.database['Sig_d']  = Sig_d
         print("Saved Doctor data to database")
+
+    def ping_download_request(self, patient):
+        print(":: phase 4, step 2:: Cloud")
+        id_p, NID, Sni, x, T_P4 = self.p_data
+        T_C10 = time()
+        self.T_C10 = T_C10
+        if not (T_C10 - T_P4) < self.delta_T:
+            print("Time Limit Exceeded between cloud and patient upload :: step-1") 
+            exit(1)
+
+        y = gen_randint()
+        self.y = y
+
+        # check database record using id_p, id_d, Sni
+        NID     = self.database['NID']
+        C_d     = self.database['C_d']
+        Sig_d   = self.database['Sig_d']
+        
+
+        T_C11 = time()
+        self.T_C11 = T_C11
+        S7      = gen_hash(SK_cp,id_p,id_d,C_d,xyg,Sig_p,T_C11)
+        E7      = encrypt(SK_cp,[S7,id_d,Sig_d,C_d,y,T_C11])
+        print("Send <E7, T_C11> to Patient via PUBLIC channel")
+        patient.c_data = (E7, T_C11)
+
+
+    def save_patient_data(self):
+        print(":: phase 4, step 4 :: Cloud")
+        E8,T_P6  = self.message
+        SK_cp  = self.SK_cp
+
+        T_C12 = time()
+        self.T_C12 = T_C12
+        if not (T_C12 - T_P6) < self.delta_T:
+            print("Time Limit Exceeded between cloud and patient upload :: step-4") 
+            exit(1)
+
+        C_e,S8,T_P6 = decrypt(SK_cp,E8)
+        S81 = gen_hash(SK_cp,S7,C_e,Sig_p,Sig_d,xyg,T_P6)
+
+        if S8 != S81:
+            print("Unable to verify Patient")
+            exit(1)
+        print("Patient verified")
+
+        self.database['C_e'] = C_e
+        print("Saved patient data to database")
+        print("Decryption key lies with patient")
+        print("SUCCESS! completed TMIS transaction using Li et al. Protocol")
+
 
 
 if __name__ == "__main__":
