@@ -1,11 +1,11 @@
 from CryptoAPI import *
-
+import time
 
 class Cloud:
 
     def __init__(self):
         self.h_data   = (0, 0)    # id_h, R
-        self.p_data   = (0, 0)    # id_p, NID
+        self.p_data   = (0, 0)    # id_p, TP1
         self.d_data   = (0, 0, 0) # id_d, id_p, RD
         self.message  = (0,0)    # S2, C1 || S4, C2
         self.database = {}
@@ -30,15 +30,23 @@ class Cloud:
 
     def ping_to_patient(self, patient):
         print(":: phase 2, step 2 ::")
-        id_p, NID = self.p_data
+        id_p, TP1 = self.p_data
         Sig_h   = self.database['Sig_h']
         C_h     = self.database['C_h']
+        NID     = self.database['NID']
+        id_h    = self.database['id_h']
         Sni     = self.Sni
 
-        I   = Sni^NID
-        S3  = gen_hash(NID, I, C_h, Sig_h)
-        print("Send <I, S3, C_h, Sig_h> to Patient via PUBLIC channel")
-        patient.c_data = (I, S3, C_h, Sig_h)
+        I1    = gen_hash(NID,id_p)
+        I     = Sni^I1
+        T_c5  = time.time()
+        c     = gen_randint() 
+        S3    = gen_hash(NID,id_p,C_h,Sig_h,c,T_c5)
+        E3    = encrypt(Sni,[Sig_h,C_h,S3,I,id_h,c,T_c5])
+
+        self.database['S3'] = S3
+        print("Send <E3,I,T_c5> to Patient via PUBLIC channel")
+        patient.c_data = (E3,I,T_c5)
 
     
     def ping_to_doctor(self, doctor):
@@ -57,20 +65,28 @@ class Cloud:
 
     def receive_and_store_hospital(self):
         print(":: phase 1, step 4 ::")
-        id_h, A, B  = self.id_h, self.A, self.B
-        S2, C1      = self.message
-        SK1_hc      = gen_hash(id_h, A, B)
+        E4,T_p3 = self.message
+        id_p, TP1 = self.p_data
+        Sig_h   = self.database['Sig_h']
+        C_h     = self.database['C_h']
+        NID     = self.database['NID']
+        id_h    = self.database['id_h']
+        S3      = self.database['S3']
+        Sni     = self.Sni
 
-        if S2 != gen_hash(SK1_hc, C1):
-            print("Cannot Authenticate Hospital")
-            exit(1)
+        d, S4, Sig_p, C_p, T_p3 = decrypt(self.Sni,E4)
+        T_c5  = time.time()
+        SK_cp = gen_hash(id_p,id_h,C_h,S3,T_c5)
+        S41 = gen_hash(SK_cp,C_p,Sig_p,S3,T_p3)
         
+        if S4 != S41 :
+            print("Couldn't authenicate")
+            exit(1)
         print("Hospital authenticated")
-        id_p, id_d, C_h, Sig_h, NID = decrypt(SK1_hc, C1)
-        self.database['id_p']   = id_p
-        self.database['C_h']    = C_h
-        self.database['Sig_h']  = Sig_h
-        self.database['NID']    = NID
+
+        self.database['C_p']   = C_p
+        self.database['id_p']    = id_p
+        self.database['Sig_p']  = Sig_p
         print("Saved Hospital data to database")
     
 
