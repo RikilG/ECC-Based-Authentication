@@ -1,31 +1,44 @@
 from CryptoAPI import *
+from time import time
 
 
 class Cloud:
 
     def __init__(self):
-        self.h_data   = (0, 0)    # id_h, R
+        self.h_data   = (0, 0, 0)    # id_h, a, T_H1 
         self.p_data   = (0, 0)    # id_p, NID
         self.d_data   = (0, 0, 0) # id_d, id_p, RD
-        self.message  = (0,0)    # S2, C1 || S4, C2
+        self.message  = (0,0,0)    # E2, T_H3, g
         self.database = {}
         self.Sni      = gen_randint()
+        self.T_C1 = 0
+        self.T_C2 = 0
+        self.b = gen_randint # b belongs to Zq*
+        self.delta_T = 5000
+        self.S1      = 0
+        self.g       = gen_randint()
 
 
     def ping_to_hospital(self,hospital):
         print(":: phase 1, step 2 ::")
-        id_h, R = self.h_data
-        self.id_h = id_h
+        self.T_C1 = time()
+        id_h, a,T_H1 = self.h_data
 
-        x   = gen_randint()
-        A   = gen_hash(id_h, R, x)
-        S1  = gen_hash(A)
-        B   = id_h^x
-        print("Send <S1, B> to Hospital via PUBLIC channel")
-        # print(f"Send <S1, B> = <{S1}, {B}> to Hospital via PUBLIC channel")
-        hospital.c_data = (S1,B)
-        self.A = A
-        self.B = B
+        if not (self.T_C1 - T_H1) < self.delta_T:
+            print("Time Limit Exceeded between cloud and hospital upload")
+            exit(1)
+        
+        self.b = gen_randint()
+        b = self.b
+        S1   = gen_hash(id_h, a, b, T_H1)
+        K1  = gen_hash(id_h, a, T_H1)
+        self.T_C2 = time()
+        T_C2 = self.T_C2
+        E1 = encrypt(K1,[b,S1,T_C2])
+        self.S1 = S1
+        print("Send <E1, T_C2> to Hospital via PUBLIC channel")
+        hospital.c_data = (E1,T_C2)
+        
     
 
     def ping_to_patient(self, patient):
@@ -57,16 +70,28 @@ class Cloud:
 
     def receive_and_store_hospital(self):
         print(":: phase 1, step 4 ::")
-        id_h, A, B  = self.id_h, self.A, self.B
-        S2, C1      = self.message
-        SK1_hc      = gen_hash(id_h, A, B)
-
-        if S2 != gen_hash(SK1_hc, C1):
+        E2, T_H3,g      = self.message
+        id_h, a,T_H1 = self.h_data
+        S1,b = self.S1,self.b
+        self.T_C3 = time()
+        self.g = g
+        abg = a*b*g
+        self.abg = abg
+        T_C3 = self.T_C3
+        if not (T_C3 - T_H3) < self.delta_T:
+            print("Time Limit Exceeded between cloud and hospital upload :: step-4") 
+            exit(1)
+        
+        SK_ch      = gen_hash(id_h, S1, abg,self.T_C1)
+        id_p,NID,C_h,S2,Sig_h,T_H3      = decrypt(SK_ch,E2)
+        S21        = gen_hash(SK_ch,C_h,Sig_h,T_H3)
+        if S2 != S21:
             print("Cannot Authenticate Hospital")
             exit(1)
         
+        
+        
         print("Hospital authenticated")
-        id_p, id_d, C_h, Sig_h, NID = decrypt(SK1_hc, C1)
         self.database['id_p']   = id_p
         self.database['C_h']    = C_h
         self.database['Sig_h']  = Sig_h
