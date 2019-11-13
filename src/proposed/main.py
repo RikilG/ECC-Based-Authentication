@@ -46,8 +46,13 @@ def treatment_phase(doctor, cloud):
     cloud.receive_and_store_doctor()
 
 
-def checkup_phase():
+def checkup_phase(patient,cloud):
     print("\n########## Phase4 ##########")
+    patient.ping_download_request(cloud)
+    cloud.ping_download_request(patient)
+    patient.send_message_checkup(cloud)
+    cloud.save_patient_data()
+
 
 
 if __name__ == "__main__":
