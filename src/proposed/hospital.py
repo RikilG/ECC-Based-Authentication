@@ -19,7 +19,7 @@ class Hospital:
         self.T_H1 = time()
         self.T_H2 = 0
         self.T_H3 = 0
-        self.delta_T = 5000
+        self.delta_T = 5
         self.abg     = 0
 
 

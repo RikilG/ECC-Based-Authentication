@@ -15,12 +15,15 @@ class Patient:
         self.T_P4   = 0
     
 
-    def meet(self, doctor, hospital):
+    def meet(self, doctor, hospital, cloud):
         self.id_d       = doctor.id_d
         self.PU_h       = hospital.PU_h
         doctor.id_p     = self.id_p
+        doctor.id_h     = hospital.id_h
         doctor.Ni       = self.Ni
         doctor.PU_h     = hospital.PU_h
+        doctor.PU_p     = self.PU_p
+        doctor.g        = cloud.g
         hospital.NID    = self.NID
         hospital.Ni     = self.Ni
         hospital.id_p   = self.id_p

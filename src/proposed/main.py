@@ -10,7 +10,7 @@ def main():
     doctor   = Doctor()
     hospital = Hospital()
     cloud    = Cloud()
-    patient.meet(doctor, hospital)
+    patient.meet(doctor, hospital, cloud)
 
     # section 4.1 - Healthcare centre upload phase
     hospital_upload_phase(hospital, cloud)
@@ -19,7 +19,7 @@ def main():
     # section 4.3 - Treatment phase
     treatment_phase(doctor, cloud)
     # section 4.4 - Check up phase
-    checkup_phase()
+    checkup_phase(patient, cloud)
 
 
 def hospital_upload_phase(hospital,cloud):

@@ -3,7 +3,7 @@ import random
 from CryptoInternals import CryptoWrapper
 
 
-def gen_hash(x, a="", b="", c="", d="",e=""):
+def gen_hash(x, a="", b="", c="", d="", e="", f="", g=""):
     """generate hash of the string after conatenating all parameters
     """
     # concatenate all parameters
@@ -12,7 +12,7 @@ def gen_hash(x, a="", b="", c="", d="",e=""):
             a = b' '.join(a)
         else:
             a = ' '.join(a)
-    x = str(x) + str(a) + str(b) + str(c) + str(d) + str(e)
+    x = str(x) + str(a) + str(b) + str(c) + str(d) + str(e) + str(f) + str(g)
     x = str.encode(x)
     x = hashlib.sha256(x).hexdigest()
     return x

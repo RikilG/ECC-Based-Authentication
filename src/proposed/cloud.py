@@ -4,21 +4,22 @@ from time import time
 class Cloud:
 
     def __init__(self):
-        self.h_data   = (0, 0, 0)    # id_h, a, T_H1 
-        self.p_data   = (0, 0)    # id_p, NID
-        self.d_data   = (0, 0, 0) # id_d, id_p, RD
-        self.message  = (0,0,0)    # E2, T_H3, g
-        self.database = {}
-        self.Sni      = gen_randint()
-        self.T_C1 = 0
-        self.T_C2 = 0
-        self.T_C10 = 0 
-        self.T_C11 = 0
-        self.b = gen_randint # b belongs to Zq*
-        self.delta_T = 5000
-        self.S1      = 0
-        self.g       = gen_randint()
-        self.y      = 0  # y belongs to Zq*
+        self.h_data     = (0, 0, 0)    # id_h, a, T_H1 
+        self.p_data     = (0, 0)    # id_p, NID
+        self.d_data     = (0, 0, 0) # id_d, id_p, RD
+        self.message    = (0,0,0)    # E2, T_H3, g
+        self.database   = {}
+        self.Sni        = gen_randint()
+        self.T_C1       = 0
+        self.T_C2       = 0
+        self.T_C10      = 0 
+        self.T_C11      = 0
+        self.b          = gen_randint # b belongs to Zq*
+        self.delta_T    = 5
+        self.S1         = 0
+        self.g          = gen_randint()
+        self.s          = gen_randint()
+        self.y          = 0  # y belongs to Zq*
 
 
     def ping_to_hospital(self,hospital):
@@ -53,7 +54,7 @@ class Cloud:
         Sni     = self.Sni
 
         I1    = gen_hash(NID,id_p)
-        I     = Sni^int(I1,16)
+        I     = Sni^int(I1, 16)
         T_c5  = time()
         c     = gen_randint() 
         S3    = gen_hash(NID,Sni,C_h,Sig_h,c,T_c5)
@@ -66,31 +67,37 @@ class Cloud:
 
     
     def ping_to_doctor(self, doctor):
-        print(":: phase 3, step 2 :: Cloud")
+        print(":: phase 3, step 2 ::")
         id_d, r, T_d1 = self.d_data
-        s = self.s
+        s           = self.s, 
+        sni         = self.Sni
+        id_p, NID   = self.p_data
+        Sig_h   = self.database['Sig_h']
+        Sig_p   = self.database['Sig_p']
+        C_p     = self.database['C_p']
 
-        if T_c7 - T_d1 > dT:
+        if time() - T_d1 > self.delta_T:
             print("Request time limit excedeed")
             exit(1)
         
-        J       = sni ^ gen_hash(id_d, r)
+        J       = sni ^ int(gen_hash(id_d, r), 16)
+        T_cs    = time()
         S5      = gen_hash(id_p, id_d, Sig_h, Sig_p, C_p, T_cs)
-        E5      = encrypt(sni, [Sig_p, Sig_h, NID, C_p, S5, s, T_cs])
+        E5      = encrypt(gen_hash(sni), [Sig_p, Sig_h, NID, C_p, S5, s, T_cs])
         print("Send <E5, J, T_cs> to Doctor via PUBLIC channel")
         doctor.c_data = (E5, J, T_cs)
     
 
     def receive_and_store_hospital(self):
         print(":: phase 1, step 4 ::")
-        E2, T_H3,g      = self.message
-        id_h, a,T_H1 = self.h_data
-        S1,b = self.S1,self.b
-        self.T_C3 = time()
-        self.g = g
-        abg = a*b*g
-        self.abg = abg
-        T_C3 = self.T_C3
+        E2, T_H3,g  = self.message
+        id_h, a,T_H1= self.h_data
+        S1,b        = self.S1,self.b
+        self.T_C3   = time()
+        self.g      = g
+        abg         = a*b*g
+        self.abg    = abg
+        T_C3        = self.T_C3
         if not (T_C3 - T_H3) < self.delta_T:
             print("Time Limit Exceeded between cloud and hospital upload :: step-4") 
             exit(1)
@@ -132,21 +139,24 @@ class Cloud:
         
         self.database['C_p']    = C_p
         self.database['Sig_p']  = Sig_p
-        self.database['id_p']    = id_p
+        self.database['id_p']   = id_p
         print("Saved Patient data to database")
 
 
     def receive_and_store_doctor(self):
-        print(":: phase 3, step 4:: Cloud")
-        E6, T_d3 = self.message
+        print(":: phase 3, step 4::")
+        E6, T_d3    = self.message
+        id_p, NID   = self.p_data
+        sni, id_d   = self.Sni, self.d_data[0]
+        Sig_p       = self.database['Sig_p']
 
-        if T_c9-T_d3 > dT:
+        if time()-T_d3 > self.delta_T:
             print("Request timed out")
             exit(1)
 
-        Sig_d, C_d, S6, T_d3  = decrypt(sni, E6)
+        Sig_d, C_d, S6, T_d3  = decrypt(gen_hash(sni), E6)
 
-        if S6 != gen_hash(id_p, id_d, Sig_d, Sig_p, T_d3):
+        if S6 != gen_hash(id_p, id_d, C_d, Sig_d, Sig_p, T_d3):
             print("Cannot authenticate Doctor")
             exit(1)
         print("Doctor authenticated")
@@ -159,7 +169,7 @@ class Cloud:
 
 
     def ping_download_request(self, patient):
-        print(":: phase 4, step 2:: Cloud")
+        print(":: phase 4, step 2::")
         id_p, NID, Sni, x, T_P4 = self.p_data
         T_C10 = time()
         self.T_C10 = T_C10
@@ -185,7 +195,7 @@ class Cloud:
 
 
     def save_patient_data(self):
-        print(":: phase 4, step 4 :: Cloud")
+        print(":: phase 4, step 4 ::")
         E8,T_P6  = self.message
         SK_cp  = self.SK_cp
 
