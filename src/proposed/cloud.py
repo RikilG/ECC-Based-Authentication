@@ -20,6 +20,10 @@ class Cloud:
         self.g          = gen_randint()
         self.s          = gen_randint()
         self.y          = 0  # y belongs to Zq*
+        self.SK_cp      = 0
+        self.x          = 0
+        self.Sig_p      = 0
+        self.PU_d       = 0
 
 
     def ping_to_hospital(self,hospital):
@@ -74,6 +78,7 @@ class Cloud:
         id_p, NID   = self.p_data
         Sig_h   = self.database['Sig_h']
         Sig_p   = self.database['Sig_p']
+        self.Sig_p = Sig_p
         C_p     = self.database['C_p']
 
         if time() - T_d1 > self.delta_T:
@@ -86,6 +91,7 @@ class Cloud:
         E5      = encrypt(gen_hash(sni), [Sig_p, Sig_h, NID, C_p, S5, s, T_cs])
         print("Send <E5, J, T_cs> to Doctor via PUBLIC channel")
         doctor.c_data = (E5, J, T_cs)
+        self.PU_d  = doctor.PU_d
     
 
     def receive_and_store_hospital(self):
@@ -129,6 +135,7 @@ class Cloud:
 
         d, S4, Sig_p, C_p, T_p3  = decrypt(gen_hash(Sni),E4)
         SK_cp = gen_hash(id_p,id_h,C_h,S3,T_c5)
+        self.SK_cp = SK_cp
         S41 = gen_hash(SK_pc,C_p,Sig_p,S3,T_p3) 
 
         if S4 != S41 :
@@ -184,11 +191,17 @@ class Cloud:
         NID     = self.database['NID']
         C_d     = self.database['C_d']
         Sig_d   = self.database['Sig_d']
-        
-
+        id_d    = self.d_data[0]
+        SK_cp   = self.SK_cp
+        x       = self.p_data[3]
+        y       = self.y
+        g       = self.g
+        xyg     = x*y*g
+        Sig_p   = self.Sig_p 
         T_C11 = time()
         self.T_C11 = T_C11
         S7      = gen_hash(SK_cp,id_p,id_d,C_d,xyg,Sig_p,T_C11)
+        print(x,y,g)
         E7      = encrypt(SK_cp,[S7,id_d,Sig_d,C_d,y,T_C11])
         print("Send <E7, T_C11> to Patient via PUBLIC channel")
         patient.c_data = (E7, T_C11)
@@ -196,15 +209,19 @@ class Cloud:
 
     def save_patient_data(self):
         print(":: phase 4, step 4 ::")
-        E8,T_P6  = self.message
+        E8,T_P6,S7  = self.message
         SK_cp  = self.SK_cp
-
+        Sig_p = self.Sig_p
         T_C12 = time()
         self.T_C12 = T_C12
         if not (T_C12 - T_P6) < self.delta_T:
             print("Time Limit Exceeded between cloud and patient upload :: step-4") 
             exit(1)
-
+        x       = self.p_data[3]
+        y       = self.y
+        g       = self.g
+        xyg     = x*y*g
+        Sig_d   = self.database['Sig_d']
         C_e,S8,T_P6 = decrypt(SK_cp,E8)
         S81 = gen_hash(SK_cp,S7,C_e,Sig_p,Sig_d,xyg,T_P6)
 

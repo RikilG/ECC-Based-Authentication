@@ -13,7 +13,10 @@ class Patient:
         self.PR_p, self.PU_p = gen_sig_keys()
         self.x      = 0  # x belongs to Zq*
         self.T_P4   = 0
-    
+        self.SK_pc  = 0
+        self.Sig_p  = 0
+        self.delta_T= 5
+        self.K4 = 0
 
     def meet(self, doctor, hospital, cloud):
         self.id_d       = doctor.id_d
@@ -28,6 +31,9 @@ class Patient:
         hospital.Ni     = self.Ni
         hospital.id_p   = self.id_p
         hospital.id_d   = doctor.id_d
+        self.Sni        = cloud.Sni
+        self.y          = cloud.y
+        self.g          = cloud.g
     
 
     def ping_to_cloud(self, cloud):
@@ -57,6 +63,7 @@ class Patient:
 
         d = gen_randint()
         SK_pc = gen_hash(id_p,id_h,C_h,S31,T_c5)
+        self.SK_pc = SK_pc
         K3 = gen_hash(id_p,id_h,NID)
         m_h = decrypt(K3,C_h)
         m_h = list(m_h)
@@ -68,8 +75,10 @@ class Patient:
         print("Cloud verified")
 
         K4      = gen_hash(id_p,id_d,Y)
+        self.K4 = K4
         C_p     = encrypt(K4,[m_h,m_b])
         Sig_p   = gen_sig(PR_p,gen_hash(m_b))
+        self.Sig_p = Sig_p
         T_p3    = time()
         S4      = gen_hash(SK_pc,C_p,Sig_p,S31,T_p3)
         E4      = encrypt(gen_hash(Y),[d,S4,Sig_p,C_p,T_p3])
@@ -94,29 +103,27 @@ class Patient:
         print(":: phase 4, step 3 :: Patient")
         E7,T_C11 = self.c_data
         SK_pc   = self.SK_pc
-        key_pd  = self.key_pd
-        key_p   = self.key_p
-        PU_d    = self.PU_d
-
+        
         T_P4 = self.T_P4
         if not (T_P4 - T_C11) < self.delta_T:
             print("Time Limit Exceeded between cloud and patient upload :: step-3") 
             exit(1)
 
+        Sig_p = self.Sig_p
+        id_p  = self.id_p
         S7,id_d,Sig_d,C_d,y,T_C11 = decrypt(SK_pc,E7)
-        
+        xyg     = self.x*y*cloud.g
         S71 = gen_hash(SK_pc,id_p,id_d,C_d,xyg,Sig_p,T_C11)
-
-
+        print(self.x,self.y,cloud.g)
         if S7 != S71:
             print("Unable to verify Cloud")
             print("Patient terminating session")
             exit(1)
         print("Cloud verified")
-
+        K4 = self.K4
         m_h, m_b, m_d = decrypt(K4, C_d)
         MD_d    = gen_hash(m_d)
-
+        PU_d    = cloud.PU_d
         if not verify_sig(PU_d, MD_d, Sig_d):
             print("Cannot Authenticate Doctor")
             exit(1)
@@ -129,4 +136,4 @@ class Patient:
         S8      = gen_hash(SK_pc,S71,C_e,Sig_p,Sig_d,xyg,T_P6)
 
         E8 = encrypt(SK_pc,[C_e,S8,T_P6])
-        cloud.message = (E8, T_P6)
+        cloud.message = (E8, T_P6,S7)

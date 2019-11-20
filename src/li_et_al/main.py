@@ -2,6 +2,7 @@ from cloud import Cloud
 from doctor import Doctor
 from patient import Patient
 from hospital import Hospital
+from time import time
 
 
 def main():
@@ -55,4 +56,16 @@ def checkup_phase(patient, cloud):
 
 
 if __name__ == "__main__":
+    # from time import time
+    # import numpy as np
+    # lst = list()
+    # for i in range(50):
+    #     st_time = time()
+    #     main()
+    #     exec_time = time() - st_time
+    #     lst.append(exec_time)
+    # print(np.array(lst).mean())
+    start_time = time()
     main()
+    end_time  = time()
+    print("time = ",end_time-start_time)
