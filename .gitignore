@@ -1,6 +1,7 @@
 project_details.mp4
 *.mp4
 *.pdf
+perf.py
 
 
 # Created by https://www.gitignore.io/api/linux,python,windows,visualstudiocode
