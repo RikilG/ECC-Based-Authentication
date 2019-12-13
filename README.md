@@ -31,9 +31,10 @@ protocol for cloud-assisted TMIS
 
 ## About The Project
 
-This repository implements the steps given by the ECC model proposed by Kumar, V., Ahmad, M., Kumari, A., A Secure Elliptic Curve Cryptography Based Mutual
-Authentication Protocol for Cloud-assisted TMIS, Telematics and Informatics (2018), [doi](https://doi.org/10.1016/) 
-and provides analysis w.r.t other crypto systems.
+This repository implements the steps given by the ECC model proposed by Kumar, V., Ahmad, M., Kumari, A., [A Secure Elliptic Curve Cryptography Based Mutual Authentication Protocol for Cloud-assisted TMIS, Telematics and Informatics (2018)](https://doi.org/10.1016/j.tele.2018.09.001),
+and provides analysis w.r.t previous crypto system proposed by [Li et al](https://doi.org/10.1016/j.cmpb.2018.02.002).
+
+The main aim of this project is to simulate a system similar to the proposed protocol. Therefore, the model implements all the required steps given in the protocol and shows its working without relying on a network based model.
 
 Built With [Python](https://www.python.org)
 
@@ -58,7 +59,7 @@ cd ECC-Based-Authentication
 ```
 2. Run program
 ```sh
-cd src
+cd src/proposed #for running proposed protocol
 python main.py
 ```
 
@@ -71,7 +72,7 @@ List of dependencies present/used in the project
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Code distributed under the MIT License. See `LICENSE` for more information.
 
 ## Team Members
 
@@ -85,4 +86,5 @@ Project Link: [https://github.com/RikilG/ECC-Based-Authentication](https://githu
 
 ## Acknowledgements
 
-* [f47h3r/CryptoWrapper](https://github.com/f47h3r/CryptoWrapper) for providing a all-in-one crypto wrapper
+* [Bits Pilani Hyderabad Campus](https://www.bits-pilani.ac.in/Hyderabad/) for providing us with access to journals and research papers.
+* [f47h3r/CryptoWrapper](https://github.com/f47h3r/CryptoWrapper) for providing a all-in-one crypto wrapper.
